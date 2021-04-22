@@ -15,8 +15,13 @@ namespace EDWIAN004 {
 	{
         private:
             std::vector<ConnectedComponent> components;
-
+            unsigned char ** data; //Hold input image in 2D array.
+            int image_width; int image_height; //number of rows and cols in input image.
         public:
+            PGMimageProcessor(std::string PGMfilename);
+
+            ~PGMimageProcessor(void);
+
             int extractComponents(unsigned char  threshold, int minValidSize);
 
             int  filterComponentsBySize(int minSize, int maxSize);
@@ -30,6 +35,16 @@ namespace EDWIAN004 {
             int getSmallestSize(void) const;
 
             void printComponentData(const ConnectedComponent & theComponent) const;
+
+            unsigned char ** readData(std::string PGMfilename);
+
+            int getImage_width();
+            int getImage_height();
+
+            void setImage_width(const int width);
+            void setImage_height(const int height);
+
+
     };
 
     #endif
