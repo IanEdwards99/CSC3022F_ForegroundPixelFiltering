@@ -38,6 +38,9 @@ namespace EDWIAN004 {
 
             unsigned char ** readData(std::string PGMfilename);
 
+            unsigned char ** getData(){
+                return data;
+            };
             int getImage_width();
             int getImage_height();
 

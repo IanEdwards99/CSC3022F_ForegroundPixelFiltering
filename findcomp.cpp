@@ -25,7 +25,7 @@ int main (int argc, char *argv[])
 	if (argc < 2) { std::cout << "Incorrect options inputted." << std::endl;} //basic error checking.
 	else{
 		if (argc == 2)
-			PGMfilename = argv[argc-1]; //filename comes last in given format
+			PGMfilename = argv[1]; //filename comes last in given format
 		else{
 			PGMfilename = argv[argc-1]; //filename comes last in given format
 			int i = 1;
@@ -51,7 +51,7 @@ int main (int argc, char *argv[])
 			}
 		}
 	}
-	
+	std::cout << PGMfilename << std::endl;
 	std::cout << min << " " << max << std::endl;
 	std::cout << threshold <<  std::endl;
 	std::cout << p << std::endl;
@@ -63,18 +63,18 @@ int main (int argc, char *argv[])
 	if (max ==0)
 		max = imageProc.getImage_height() * imageProc.getImage_width();
 
-	int nrComponents = imageProc.extractComponents(threshold, min);
+	//nrComponents = imageProc.extractComponents(threshold, min);
 	
 //output to a file.
-	// std::ofstream wf("./output/" + PGMfilename + "TEST.pgm", std::ios::out | std::ios::binary);
-	// if(!wf) {
-	// 	std::cout << "Cannot open file!" << std::endl;
-	// }
-	// wf << "P5" << std::endl << *cols << " " << *rows << std::endl << 255 << std::endl;
-	// for (int i = 0; i < *rows; i ++){
-	// 	wf.write((char*)(data[i]), *cols); //write out each row in frame_matrix in question from imageSequence.
-	// }
-	// wf.close();
+	std::ofstream wf("./output/" + PGMfilename + "TEST.pgm", std::ios::out | std::ios::binary);
+	if(!wf) {
+		std::cout << "Cannot open file!" << std::endl;
+	}
+	wf << "P5" << std::endl << imageProc.getImage_width() << " " << imageProc.getImage_height() << std::endl << 255 << std::endl;
+	for (int i = 0; i < imageProc.getImage_height(); i ++){
+		wf.write((char*)(imageProc.getData()[i]), imageProc.getImage_width()); //write out each row in frame_matrix in question from imageSequence.
+	}
+	wf.close();
 
 
 	std::cout << "Program exited." << std::endl;

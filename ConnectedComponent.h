@@ -21,6 +21,11 @@ namespace EDWIAN004 {
             ConnectedComponent(void);
             ConnectedComponent(int nrPixels, int identifier, std::vector<std::pair<int, int>> pixels);
             ~ConnectedComponent(void);
+
+            int getNrPixels();
+            void setNrPixels(int nrPixels);
+            void setIdentifier(int identifier);
+            void addToPixels(std::pair<int, int> vals);
         //implement copy and copy operator
 
         //implement movable

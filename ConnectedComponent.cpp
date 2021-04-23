@@ -19,3 +19,16 @@ EDWIAN004::ConnectedComponent::~ConnectedComponent(){
     }
     //pixels vector is deleted when out of scope.
 };
+
+int EDWIAN004::ConnectedComponent::getNrPixels(){
+    return this->nrPixels;
+}
+void EDWIAN004::ConnectedComponent::setNrPixels(int nrPixels){
+    this->nrPixels = nrPixels;
+};
+void EDWIAN004::ConnectedComponent::setIdentifier(int identifier){
+    this->identifier = identifier;
+};
+void EDWIAN004::ConnectedComponent::addToPixels(std::pair<int, int> vals){
+    this->pixels.push_back(vals);
+};
