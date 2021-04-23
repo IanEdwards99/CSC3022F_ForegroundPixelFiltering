@@ -51,11 +51,7 @@ int main (int argc, char *argv[])
 			}
 		}
 	}
-	std::cout << PGMfilename << std::endl;
-	std::cout << min << " " << max << std::endl;
-	std::cout << threshold <<  std::endl;
-	std::cout << p << std::endl;
-	std::cout << w << std::endl;
+
 
 	EDWIAN004::PGMimageProcessor imageProc = EDWIAN004::PGMimageProcessor(PGMfilename); //PGMimageProcessor instance created on stack as automatic variable.
 
@@ -63,18 +59,27 @@ int main (int argc, char *argv[])
 	if (max ==0)
 		max = imageProc.getImage_height() * imageProc.getImage_width();
 
-	//nrComponents = imageProc.extractComponents(threshold, min);
-	
+	std::cout << "filename:" << PGMfilename << std::endl;
+	std::cout << "image width: " << imageProc.getImage_width() << " image height: " << imageProc.getImage_height() << std::endl;
+	std::cout << "min: " << min << " max:" << max << std::endl;
+	std::cout << "threshold: " << threshold <<  std::endl;
+	std::cout << p << std::endl;
+	std::cout << w << std::endl;
+
+	nrComponents = imageProc.extractComponents(threshold, min);
+	std::cout << "Components: " << nrComponents << std::endl;
+	imageProc.writeComponents("output.pgm");
+
 //output to a file.
-	std::ofstream wf("./output/" + PGMfilename + "TEST.pgm", std::ios::out | std::ios::binary);
-	if(!wf) {
-		std::cout << "Cannot open file!" << std::endl;
-	}
-	wf << "P5" << std::endl << imageProc.getImage_width() << " " << imageProc.getImage_height() << std::endl << 255 << std::endl;
-	for (int i = 0; i < imageProc.getImage_height(); i ++){
-		wf.write((char*)(imageProc.getData()[i]), imageProc.getImage_width()); //write out each row in frame_matrix in question from imageSequence.
-	}
-	wf.close();
+	// std::ofstream wf("./output/" + PGMfilename, std::ios::out | std::ios::binary);
+	// if(!wf) {
+	// 	std::cout << "Cannot open file!" << std::endl;
+	// }
+	// wf << "P5" << std::endl << imageProc.getImage_width() << " " << imageProc.getImage_height() << std::endl << 255 << std::endl;
+	// for (int i = 0; i < imageProc.getImage_height(); i ++){
+	// 	wf.write((char*)(imageProc.getData()[i]), imageProc.getImage_width()); //write out each row in frame_matrix in question from imageSequence.
+	// }
+	// wf.close();
 
 
 	std::cout << "Program exited." << std::endl;

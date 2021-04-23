@@ -23,6 +23,7 @@ namespace EDWIAN004 {
             ~ConnectedComponent(void);
 
             int getNrPixels();
+            std::vector<std::pair<int,int>> getPixels(){ return pixels; };
             void setNrPixels(int nrPixels);
             void setIdentifier(int identifier);
             void addToPixels(std::pair<int, int> vals);

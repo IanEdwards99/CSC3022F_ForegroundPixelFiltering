@@ -10,9 +10,8 @@
 #include <queue>
 
 //Class method definitions
-EDWIAN004::PGMimageProcessor::PGMimageProcessor(std::string PGMfilename) : components(NULL), image_height(0), image_width(0), data(nullptr){
+EDWIAN004::PGMimageProcessor::PGMimageProcessor(std::string PGMfilename) : image_height(0), image_width(0), data(nullptr){
     data = EDWIAN004::PGMimageProcessor::readData(PGMfilename); //load in 2D array image.
-	std::cout << data[0][0] << std::endl;
 };
 
 EDWIAN004::PGMimageProcessor::~PGMimageProcessor(void){
@@ -30,6 +29,7 @@ EDWIAN004::PGMimageProcessor::~PGMimageProcessor(void){
 int EDWIAN004::PGMimageProcessor::extractComponents(unsigned char  threshold, int minValidSize){
     
 	int identifier = 0;
+
 	//Start at top left pixel of image and scan image rows to find a foreground pixel.
 	for (int y = 0; y < image_height; y++){
 		for (int x=0; x < image_width; x++) {
@@ -37,51 +37,80 @@ int EDWIAN004::PGMimageProcessor::extractComponents(unsigned char  threshold, in
 				std::queue<std::pair<int,int>> neighbours; //queue holding coordinates to unprocessed neighbours, initially empty.
 				neighbours.push(std::pair<int, int> {y, x}); //push coordinates to queue.
 				EDWIAN004::ConnectedComponent component = EDWIAN004::ConnectedComponent();
-
+				++identifier;
+				component.setIdentifier(identifier);
+				
 				while (!neighbours.empty()){
 					std::pair<int,int> val = neighbours.front();
 					neighbours.pop();
 					if (data[val.first][val.second] >=threshold){
 						//set the n
 						component.addToPixels(val); 
-						component.setNrPixels(component.getNrPixels());
-						component.setIdentifier(identifier++);
-						data[val.first][val.second] = 0;//set foreground pixel to background now that its processed.
-
-						if (x>0)
-							neighbours.push(std::pair<int, int> {y, x-1});
-						if (x < image_width-1)
-							neighbours.push(std::pair<int, int> {y, x+1});
-						if (y > 0)
-							neighbours.push(std::pair<int, int> {y-1, x});
-						if (y < image_height-1)
-							neighbours.push(std::pair<int, int> {y+1, x});
-
+						component.setNrPixels(component.getNrPixels()+1);
+						
+						data[val.first][val.second] = 0;				//set foreground pixel to background now that its processed.
+						
+						if (val.second>0){
+							neighbours.push(std::pair<int, int> {val.first, val.second-1});
+						}
+						if (val.second < image_width-1){
+							neighbours.push(std::pair<int, int> {val.first, val.second+1});
+						}
+						if (val.first > 0){
+							neighbours.push(std::pair<int, int> {val.first-1, val.second});
+						}
+						if (val.first < image_height-1){
+							neighbours.push(std::pair<int, int> {val.first+1, val.second});
+						}
+						
 					}
 				}
 
 				//is it big enough? 
+				
 				if (component.getNrPixels() > minValidSize)
 					components.push_back(component);
 				
-				//data[y][x] = 0; //set foreground pixel to background now that its processed.
-			};
+			}
 		}
 	}
-
-
-    //found a value, push to queue, find neighbours, if foreground pixels, add to component, push to queue. Set current foreground pixel to 0 in image.
-    EDWIAN004::ConnectedComponent *component = new EDWIAN004::ConnectedComponent(); //create component on heap.
-    //at a point, check neighbours, if foreground pixels, add to ConnectedComponent. Push 
-    return 0;
+    return components.size();
 };
 
 int EDWIAN004::PGMimageProcessor::filterComponentsBySize(int minSize, int maxSize){
+
+
     return 0;
 };
 
 bool EDWIAN004::PGMimageProcessor::writeComponents(const std::string & outFileName){
-    return 0;
+	unsigned char ** output = new unsigned char*[image_height];
+	for (int i= 0; i < image_height; i++){
+		output[i] = new unsigned char[image_width];
+		for (int j = 0; j<image_width; j++)
+			output[i][j] = 0; //set all values to white.
+	}
+	//loop through vector of components and add each pixel coord to image as 255.
+	
+	for (int k = 0; k < components.size(); k++){
+		std::vector<std::pair<int,int>> pixelArray = components[k].getPixels();
+		for (int j = 0; j < pixelArray.size(); j++){
+			output[pixelArray[j].first][pixelArray[j].second] = 255;
+		}
+	}
+	std::cout << "done" << std::endl;
+	std::ofstream wf("./output/" + outFileName, std::ios::out | std::ios::binary);
+	if(!wf) {
+		std::cout << "Cannot open file!" << std::endl;
+		return false;
+	}
+	wf << "P5" << std::endl << image_width << " " << image_height << std::endl << 255 << std::endl;
+	for (int i = 0; i < image_height; i ++){
+		wf.write((char*)(output[i]), image_width); //write out each row in frame_matrix in question from imageSequence.
+	}
+	wf.close();
+
+    return true;
 };
 
 int EDWIAN004::PGMimageProcessor::getComponentCount(void) const {
@@ -129,7 +158,6 @@ unsigned char ** EDWIAN004::PGMimageProcessor::readData(std::string PGMfilename)
 		while (!ifs.eof()){
 			for (int y = 0; y < rows; y++){
 				ifs.read((char*)matrix[y], cols);
-				//std::cout << matrix[y] << std::endl;
 			}
 		}
 		ifs.close();
