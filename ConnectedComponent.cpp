@@ -20,7 +20,11 @@ EDWIAN004::ConnectedComponent::~ConnectedComponent(){
     //pixels vector is deleted when out of scope.
 };
 
-int EDWIAN004::ConnectedComponent::getNrPixels(){
+int EDWIAN004::ConnectedComponent::getID() const{
+    return this->identifier;
+}
+
+int EDWIAN004::ConnectedComponent::getNrPixels() const{
     return this->nrPixels;
 }
 void EDWIAN004::ConnectedComponent::setNrPixels(int nrPixels){

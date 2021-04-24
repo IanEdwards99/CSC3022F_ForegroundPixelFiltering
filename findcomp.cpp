@@ -29,7 +29,8 @@ int main (int argc, char *argv[])
 		else{
 			PGMfilename = argv[argc-1]; //filename comes last in given format
 			int i = 1;
-			while (i < argc){
+			std::cout << argc << " " << i << std::endl;
+			while (i < argc-1){
 				if (argv[i] == std::string("-t")){
 					threshold = std::stoi(argv[i+1]);
 					i += 2;
@@ -52,13 +53,15 @@ int main (int argc, char *argv[])
 		}
 	}
 
-
+	std::cout << "derp" << std::endl;
 	EDWIAN004::PGMimageProcessor imageProc = EDWIAN004::PGMimageProcessor(PGMfilename); //PGMimageProcessor instance created on stack as automatic variable.
 
 	//set default max component size.
 	if (max ==0)
 		max = imageProc.getImage_height() * imageProc.getImage_width();
-
+	//basic range error handling.
+	if (threshold > 255 or threshold < 0) 
+		threshold = 128;
 	std::cout << "filename:" << PGMfilename << std::endl;
 	std::cout << "image width: " << imageProc.getImage_width() << " image height: " << imageProc.getImage_height() << std::endl;
 	std::cout << "min: " << min << " max:" << max << std::endl;
@@ -69,18 +72,6 @@ int main (int argc, char *argv[])
 	nrComponents = imageProc.extractComponents(threshold, min);
 	std::cout << "Components: " << nrComponents << std::endl;
 	imageProc.writeComponents("output.pgm");
-
-//output to a file.
-	// std::ofstream wf("./output/" + PGMfilename, std::ios::out | std::ios::binary);
-	// if(!wf) {
-	// 	std::cout << "Cannot open file!" << std::endl;
-	// }
-	// wf << "P5" << std::endl << imageProc.getImage_width() << " " << imageProc.getImage_height() << std::endl << 255 << std::endl;
-	// for (int i = 0; i < imageProc.getImage_height(); i ++){
-	// 	wf.write((char*)(imageProc.getData()[i]), imageProc.getImage_width()); //write out each row in frame_matrix in question from imageSequence.
-	// }
-	// wf.close();
-
 
 	std::cout << "Program exited." << std::endl;
 	return 0; // always return a value to calling system

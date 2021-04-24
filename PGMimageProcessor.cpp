@@ -78,9 +78,11 @@ int EDWIAN004::PGMimageProcessor::extractComponents(unsigned char  threshold, in
 };
 
 int EDWIAN004::PGMimageProcessor::filterComponentsBySize(int minSize, int maxSize){
-
-
-    return 0;
+	for (std::vector<ConnectedComponent>::iterator it = components.begin(); it < components.end(); it++){
+		if (it->getNrPixels() < minSize or it->getNrPixels() > maxSize)
+			components.erase(it);
+	}
+	return components.size();
 };
 
 bool EDWIAN004::PGMimageProcessor::writeComponents(const std::string & outFileName){
@@ -114,18 +116,31 @@ bool EDWIAN004::PGMimageProcessor::writeComponents(const std::string & outFileNa
 };
 
 int EDWIAN004::PGMimageProcessor::getComponentCount(void) const {
-    return 0;
+    return components.size();
 };
 
 int EDWIAN004::PGMimageProcessor::getLargestSize(void) const{
-    return 0;
+	int largest = 0;
+    for (auto& it : components){
+		int pixels = it.getNrPixels();
+		if (pixels > largest)
+			largest = pixels;
+	}
+	return largest;
 }
 
 int EDWIAN004::PGMimageProcessor::getSmallestSize(void) const{
-    return 0;
+	int smallest = components[0].getNrPixels();
+    for (auto& it : components){
+		int pixels = it.getNrPixels();
+		if (pixels < smallest)
+			smallest = pixels;
+	}
+	return smallest;
 };
 
 void EDWIAN004::PGMimageProcessor::printComponentData(const ConnectedComponent & theComponent) const{
+	std::cout << "Component ID: " << theComponent.getID() << "| Number of pixels: " << theComponent.getNrPixels() << std::endl;
 };
 
 unsigned char ** EDWIAN004::PGMimageProcessor::readData(std::string PGMfilename){
