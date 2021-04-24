@@ -100,7 +100,6 @@ bool EDWIAN004::PGMimageProcessor::writeComponents(const std::string & outFileNa
 			output[pixelArray[j].first][pixelArray[j].second] = 255;
 		}
 	}
-	std::cout << "done" << std::endl;
 	std::ofstream wf("./output/" + outFileName, std::ios::out | std::ios::binary);
 	if(!wf) {
 		std::cout << "Cannot open file!" << std::endl;
@@ -142,6 +141,12 @@ int EDWIAN004::PGMimageProcessor::getSmallestSize(void) const{
 void EDWIAN004::PGMimageProcessor::printComponentData(const ConnectedComponent & theComponent) const{
 	std::cout << "Component ID: " << theComponent.getID() << "| Number of pixels: " << theComponent.getNrPixels() << std::endl;
 };
+
+void EDWIAN004::PGMimageProcessor::printComponents() const{
+	for (int i =0; i < components.size(); i++){
+		EDWIAN004::PGMimageProcessor::printComponentData(components[i]);
+	}
+}
 
 unsigned char ** EDWIAN004::PGMimageProcessor::readData(std::string PGMfilename){
     int rows, cols;

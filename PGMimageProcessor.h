@@ -36,6 +36,8 @@ namespace EDWIAN004 {
 
             void printComponentData(const ConnectedComponent & theComponent) const;
 
+            void printComponents() const;
+
             unsigned char ** readData(std::string PGMfilename);
 
             unsigned char ** getData(){

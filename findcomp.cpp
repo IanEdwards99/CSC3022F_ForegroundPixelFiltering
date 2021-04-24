@@ -29,7 +29,6 @@ int main (int argc, char *argv[])
 		else{
 			PGMfilename = argv[argc-1]; //filename comes last in given format
 			int i = 1;
-			std::cout << argc << " " << i << std::endl;
 			while (i < argc-1){
 				if (argv[i] == std::string("-t")){
 					threshold = std::stoi(argv[i+1]);
@@ -53,7 +52,6 @@ int main (int argc, char *argv[])
 		}
 	}
 
-	std::cout << "derp" << std::endl;
 	EDWIAN004::PGMimageProcessor imageProc = EDWIAN004::PGMimageProcessor(PGMfilename); //PGMimageProcessor instance created on stack as automatic variable.
 
 	//set default max component size.
@@ -62,16 +60,30 @@ int main (int argc, char *argv[])
 	//basic range error handling.
 	if (threshold > 255 or threshold < 0) 
 		threshold = 128;
-	std::cout << "filename:" << PGMfilename << std::endl;
-	std::cout << "image width: " << imageProc.getImage_width() << " image height: " << imageProc.getImage_height() << std::endl;
-	std::cout << "min: " << min << " max:" << max << std::endl;
-	std::cout << "threshold: " << threshold <<  std::endl;
-	std::cout << p << std::endl;
-	std::cout << w << std::endl;
+
+	// std::cout << "filename:" << PGMfilename << std::endl;
+	// std::cout << "image width: " << imageProc.getImage_width() << " image height: " << imageProc.getImage_height() << std::endl;
+	// std::cout << "min: " << min << " max:" << max << std::endl;
+	// std::cout << "threshold: " << threshold <<  std::endl;
+	// std::cout << p << std::endl;
+	// std::cout << w << std::endl;
 
 	nrComponents = imageProc.extractComponents(threshold, min);
-	std::cout << "Components: " << nrComponents << std::endl;
-	imageProc.writeComponents("output.pgm");
+	 
+	int size = imageProc.filterComponentsBySize(min, max);
+	if (p){
+		imageProc.printComponents();
+		std::cout << "Components: " << imageProc.getComponentCount() << std::endl;
+		std::cout << "Smallest: " << imageProc.getSmallestSize() << std::endl;
+		std::cout << "Largest: " << imageProc.getLargestSize() << std::endl;
+	}
+	if (w){
+		bool passed = imageProc.writeComponents(outPGMfile);
+		if (passed)
+			std::cout << "Write successful." << std::endl;
+		else
+			std::cout << "Write failed!." << std::endl;
+	}
 
 	std::cout << "Program exited." << std::endl;
 	return 0; // always return a value to calling system
