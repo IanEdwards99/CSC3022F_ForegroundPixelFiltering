@@ -8,22 +8,11 @@
 #include <exception>
 #include "PGMimageProcessor.h"
 #include <queue>
+#include <memory>
 
 //Class method definitions
 EDWIAN004::PGMimageProcessor::PGMimageProcessor(std::string PGMfilename) : image_height(0), image_width(0), data(nullptr){
     data = EDWIAN004::PGMimageProcessor::readData(PGMfilename); //load in 2D array image.
-};
-
-EDWIAN004::PGMimageProcessor::~PGMimageProcessor(void){
-    	//Clear memory of PGM input image.
-	if (data != nullptr){ //matrix deconstructor.
-        for (int k = 0; k < image_height; k++){
-            if (data[k] != nullptr){
-                delete data[k];
-            }
-        }
-	    delete data;
-    }
 };
 
 int EDWIAN004::PGMimageProcessor::extractComponents(unsigned char  threshold, int minValidSize){
@@ -36,6 +25,7 @@ int EDWIAN004::PGMimageProcessor::extractComponents(unsigned char  threshold, in
 			if (data[y][x] >= threshold){ //start BFS.
 				std::queue<std::pair<int,int>> neighbours; //queue holding coordinates to unprocessed neighbours, initially empty.
 				neighbours.push(std::pair<int, int> {y, x}); //push coordinates to queue.
+
 				EDWIAN004::ConnectedComponent component = EDWIAN004::ConnectedComponent();
 				++identifier;
 				component.setIdentifier(identifier);
@@ -68,18 +58,31 @@ int EDWIAN004::PGMimageProcessor::extractComponents(unsigned char  threshold, in
 
 				//is it big enough? 
 				
-				if (component.getNrPixels() > minValidSize)
-					components.push_back(component);
+				if (component.getNrPixels() > minValidSize){
+					std::unique_ptr<ConnectedComponent> ptr(new ConnectedComponent(component));
+					components.push_back(std::move(ptr));
+				}
 				
 			}
 		}
 	}
+
+	//Clear memory of PGM input image.
+	if (data != nullptr){ //matrix deconstructor.
+        for (int k = 0; k < image_height; k++){
+            if (data[k] != nullptr){
+                delete[] data[k];
+            }
+        }
+	    delete[] data;
+    }
+
     return components.size();
 };
 
 int EDWIAN004::PGMimageProcessor::filterComponentsBySize(int minSize, int maxSize){
-	for (std::vector<ConnectedComponent>::iterator it = components.begin(); it < components.end(); it++){
-		if (it->getNrPixels() < minSize or it->getNrPixels() > maxSize)
+	for (std::vector<std::unique_ptr<ConnectedComponent>>::iterator it = components.begin(); it < components.end(); it++){
+		if ((*it)->getNrPixels() < minSize or (*it)->getNrPixels() > maxSize)
 			components.erase(it);
 	}
 	return components.size();
@@ -95,7 +98,7 @@ bool EDWIAN004::PGMimageProcessor::writeComponents(const std::string & outFileNa
 	//loop through vector of components and add each pixel coord to image as 255.
 	
 	for (int k = 0; k < components.size(); k++){
-		std::vector<std::pair<int,int>> pixelArray = components[k].getPixels();
+		std::vector<std::pair<int,int>> pixelArray = components[k]->getPixels();
 		for (int j = 0; j < pixelArray.size(); j++){
 			output[pixelArray[j].first][pixelArray[j].second] = 255;
 		}
@@ -110,7 +113,6 @@ bool EDWIAN004::PGMimageProcessor::writeComponents(const std::string & outFileNa
 		wf.write((char*)(output[i]), image_width); //write out each row in frame_matrix in question from imageSequence.
 	}
 	wf.close();
-
     return true;
 };
 
@@ -121,7 +123,7 @@ int EDWIAN004::PGMimageProcessor::getComponentCount(void) const {
 int EDWIAN004::PGMimageProcessor::getLargestSize(void) const{
 	int largest = 0;
     for (auto& it : components){
-		int pixels = it.getNrPixels();
+		int pixels = it->getNrPixels();
 		if (pixels > largest)
 			largest = pixels;
 	}
@@ -129,9 +131,9 @@ int EDWIAN004::PGMimageProcessor::getLargestSize(void) const{
 }
 
 int EDWIAN004::PGMimageProcessor::getSmallestSize(void) const{
-	int smallest = components[0].getNrPixels();
+	int smallest = components[0]->getNrPixels();
     for (auto& it : components){
-		int pixels = it.getNrPixels();
+		int pixels = it->getNrPixels();
 		if (pixels < smallest)
 			smallest = pixels;
 	}
@@ -144,7 +146,7 @@ void EDWIAN004::PGMimageProcessor::printComponentData(const ConnectedComponent &
 
 void EDWIAN004::PGMimageProcessor::printComponents() const{
 	for (int i =0; i < components.size(); i++){
-		EDWIAN004::PGMimageProcessor::printComponentData(components[i]);
+		EDWIAN004::PGMimageProcessor::printComponentData(*(components[i]));
 	}
 }
 
@@ -186,11 +188,11 @@ unsigned char ** EDWIAN004::PGMimageProcessor::readData(std::string PGMfilename)
     return nullptr;
 };
 
-int EDWIAN004::PGMimageProcessor::getImage_width(){
+int EDWIAN004::PGMimageProcessor::getImage_width() const{
     return image_width;
 };
 
-int EDWIAN004::PGMimageProcessor::getImage_height(){
+int EDWIAN004::PGMimageProcessor::getImage_height() const{
     return image_height;
 };
 

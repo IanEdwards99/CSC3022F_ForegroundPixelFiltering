@@ -22,6 +22,12 @@ namespace EDWIAN004 {
             ConnectedComponent(int nrPixels, int identifier, std::vector<std::pair<int, int>> pixels);
             ~ConnectedComponent(void);
 
+            ConnectedComponent(const ConnectedComponent& p);
+            ConnectedComponent(ConnectedComponent && p);
+
+            ConnectedComponent& operator=(const ConnectedComponent& rhs);
+            ConnectedComponent& operator=(ConnectedComponent&& rhs);
+
             int getID() const;
             int getNrPixels() const;
             std::vector<std::pair<int,int>> getPixels(){ return pixels; };

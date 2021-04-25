@@ -5,6 +5,7 @@
 #include <cctype>
 #include <cmath>
 #include "ConnectedComponent.h"
+#include <memory>
 
 #ifndef PGMimageProcessor_h
 #define PGMimageProcessor_h
@@ -14,13 +15,11 @@ namespace EDWIAN004 {
 	class PGMimageProcessor
 	{
         private:
-            std::vector<ConnectedComponent> components;
+            std::vector<std::unique_ptr<ConnectedComponent>> components;
             unsigned char ** data; //Hold input image in 2D array.
             int image_width; int image_height; //number of rows and cols in input image.
         public:
             PGMimageProcessor(std::string PGMfilename);
-
-            ~PGMimageProcessor(void);
 
             int extractComponents(unsigned char  threshold, int minValidSize);
 
@@ -43,8 +42,8 @@ namespace EDWIAN004 {
             unsigned char ** getData(){
                 return data;
             };
-            int getImage_width();
-            int getImage_height();
+            int getImage_width() const;
+            int getImage_height() const;
 
             void setImage_width(const int width);
             void setImage_height(const int height);
