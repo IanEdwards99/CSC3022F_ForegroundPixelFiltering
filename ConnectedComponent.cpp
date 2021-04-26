@@ -22,8 +22,8 @@ EDWIAN004::ConnectedComponent::~ConnectedComponent(){
     //pixels vector is deleted when out of scope.
 };
 
-EDWIAN004::ConnectedComponent::ConnectedComponent(const EDWIAN004::ConnectedComponent & p) : nrPixels(p.nrPixels), identifier(p.identifier), pixels(NULL){
-    if (&p.pixels != nullptr){
+EDWIAN004::ConnectedComponent::ConnectedComponent(const EDWIAN004::ConnectedComponent & p) : nrPixels(p.nrPixels), identifier(p.identifier), pixels(p.pixels){
+    if (!p.pixels.empty()){
         pixels = p.pixels;
     }
 };
@@ -32,20 +32,16 @@ EDWIAN004::ConnectedComponent& EDWIAN004::ConnectedComponent::operator=(const ED
     if (this != &rhs){
         this-> nrPixels = rhs.nrPixels;
         this->identifier = rhs.identifier;
-        if (&this->pixels != nullptr){
-            for (int i = 0; i<pixels.size(); i++){
-                if (&this->pixels[i] != nullptr)
-                    delete &this->pixels[i];
-            }
+        if (!this->pixels.empty()){
             this->pixels.clear();
         }
-        if (&rhs.pixels != nullptr)
+        if (!rhs.pixels.empty())
             this->pixels = rhs.pixels;
     }
     return *this;
 };
 
-EDWIAN004::ConnectedComponent::ConnectedComponent(EDWIAN004::ConnectedComponent && p) : nrPixels(p.nrPixels), identifier(p.identifier), pixels(NULL){
+EDWIAN004::ConnectedComponent::ConnectedComponent(EDWIAN004::ConnectedComponent && p) : nrPixels(p.nrPixels), identifier(p.identifier), pixels(p.pixels){
     p.pixels.clear();
 };
 
@@ -53,11 +49,7 @@ EDWIAN004::ConnectedComponent& EDWIAN004::ConnectedComponent::operator=(EDWIAN00
     if (this != &rhs){
         this-> nrPixels = rhs.nrPixels;
         this-> identifier = rhs.identifier;
-        if (&this->pixels != nullptr){
-            for (int i = 0; i<pixels.size(); i++){
-                if (&this->pixels[i] != nullptr)
-                    delete &this->pixels[i];
-            }
+        if (!this->pixels.empty()){
            this->pixels.clear();
            if (!rhs.pixels.empty())
             this->pixels = std::move(rhs.pixels);

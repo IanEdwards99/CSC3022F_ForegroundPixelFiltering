@@ -64,11 +64,8 @@ int main (int argc, char *argv[])
 	std::cout << "image width: " << imageProc.getImage_width() << " image height: " << imageProc.getImage_height() << std::endl;
 	std::cout << "min: " << min << " max:" << max << std::endl;
 	std::cout << "threshold: " << threshold <<  std::endl;
-	std::cout << p << std::endl;
-	std::cout << w << std::endl;
 
 	nrComponents = imageProc.extractComponents(threshold, min);
-	 
 	int size = imageProc.filterComponentsBySize(min, max);
 	if (p){
 		imageProc.printComponents();

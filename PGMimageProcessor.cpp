@@ -25,18 +25,18 @@ int EDWIAN004::PGMimageProcessor::extractComponents(unsigned char  threshold, in
 			if (data[y][x] >= threshold){ //start BFS.
 				std::queue<std::pair<int,int>> neighbours; //queue holding coordinates to unprocessed neighbours, initially empty.
 				neighbours.push(std::pair<int, int> {y, x}); //push coordinates to queue.
-
-				EDWIAN004::ConnectedComponent component = EDWIAN004::ConnectedComponent();
+				std::unique_ptr<ConnectedComponent> component(new EDWIAN004::ConnectedComponent());
+				//EDWIAN004::ConnectedComponent component = EDWIAN004::ConnectedComponent();
 				++identifier;
-				component.setIdentifier(identifier);
+				component->setIdentifier(identifier);
 				
 				while (!neighbours.empty()){
 					std::pair<int,int> val = neighbours.front();
 					neighbours.pop();
 					if (data[val.first][val.second] >=threshold){
 						//set the n
-						component.addToPixels(val); 
-						component.setNrPixels(component.getNrPixels()+1);
+						component->addToPixels(val); 
+						component->setNrPixels(component->getNrPixels()+1);
 						
 						data[val.first][val.second] = 0;				//set foreground pixel to background now that its processed.
 						
@@ -58,9 +58,8 @@ int EDWIAN004::PGMimageProcessor::extractComponents(unsigned char  threshold, in
 
 				//is it big enough? 
 				
-				if (component.getNrPixels() > minValidSize){
-					std::unique_ptr<ConnectedComponent> ptr(new ConnectedComponent(component));
-					components.push_back(std::move(ptr));
+				if (component->getNrPixels() > minValidSize){
+					components.push_back(std::move(component));
 				}
 				
 			}
@@ -76,14 +75,19 @@ int EDWIAN004::PGMimageProcessor::extractComponents(unsigned char  threshold, in
         }
 	    delete[] data;
     }
-
     return components.size();
 };
 
 int EDWIAN004::PGMimageProcessor::filterComponentsBySize(int minSize, int maxSize){
 	for (std::vector<std::unique_ptr<ConnectedComponent>>::iterator it = components.begin(); it < components.end(); it++){
-		if ((*it)->getNrPixels() < minSize or (*it)->getNrPixels() > maxSize)
+		if ((*it)->getNrPixels() < minSize){
 			components.erase(it);
+			--it;
+		}
+		if ((*it)->getNrPixels() > maxSize){
+			components.erase(it);
+			--it;
+		}
 	}
 	return components.size();
 };
@@ -93,14 +97,14 @@ bool EDWIAN004::PGMimageProcessor::writeComponents(const std::string & outFileNa
 	for (int i= 0; i < image_height; i++){
 		output[i] = new unsigned char[image_width];
 		for (int j = 0; j<image_width; j++)
-			output[i][j] = 0; //set all values to white.
+			output[i][j] = 0; //set all values to black.
 	}
 	//loop through vector of components and add each pixel coord to image as 255.
 	
 	for (int k = 0; k < components.size(); k++){
 		std::vector<std::pair<int,int>> pixelArray = components[k]->getPixels();
 		for (int j = 0; j < pixelArray.size(); j++){
-			output[pixelArray[j].first][pixelArray[j].second] = 255;
+			output[pixelArray[j].first][pixelArray[j].second] = 255; //set pixel values to white.
 		}
 	}
 	std::ofstream wf("./output/" + outFileName, std::ios::out | std::ios::binary);
@@ -122,6 +126,7 @@ int EDWIAN004::PGMimageProcessor::getComponentCount(void) const {
 
 int EDWIAN004::PGMimageProcessor::getLargestSize(void) const{
 	int largest = 0;
+	if (components.empty()) return 0;
     for (auto& it : components){
 		int pixels = it->getNrPixels();
 		if (pixels > largest)
@@ -131,6 +136,7 @@ int EDWIAN004::PGMimageProcessor::getLargestSize(void) const{
 }
 
 int EDWIAN004::PGMimageProcessor::getSmallestSize(void) const{
+	if (components.empty()) return 0;
 	int smallest = components[0]->getNrPixels();
     for (auto& it : components){
 		int pixels = it->getNrPixels();

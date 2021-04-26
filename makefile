@@ -17,8 +17,12 @@ tags: ConnectedComponent.o PGMimageProcessor.o findcomp.o
 clean:
 	@rm -f *.o
 	@rm findcomp.exe
+	@rm test.exe
    
 # copies/moves the relevant binaries and/or libraries to the correct folders   
 install:
 	@mv findcomp.exe ~/bin
+	
+test: ConnectedComponent.o PGMimageProcessor.o Test.o
+	$(CC) ConnectedComponent.o PGMimageProcessor.o Test.o -o test.exe $(LIBS)
 
